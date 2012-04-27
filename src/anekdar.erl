@@ -1,0 +1,24 @@
+%% Feel free to use, reuse and abuse the code in this file.
+
+-module(anekdar).
+-behaviour(application).
+-export([start/0, start/2, stop/1]).
+
+start() ->
+	application:start(cowboy),
+	application:start(anekdar).
+
+start(_Type, _Args) ->
+	Dispatch = [
+		{'_', [
+			{'_', default_handler, []}
+		]}
+	],
+	cowboy:start_listener(my_http_listener, 100,
+		cowboy_tcp_transport, [{port, 9999}],
+		cowboy_http_protocol, [{dispatch, Dispatch}]
+	),
+	anekdar_sup:start_link().
+
+stop(_State) ->
+	ok.

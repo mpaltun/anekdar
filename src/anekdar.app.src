@@ -1,0 +1,14 @@
+{application, anekdar,
+ [
+  {description, "realtime pub-sub messaging server"},
+  {vsn, "0.1.0"},
+  {modules, []},
+  {registered, [anekdar_sup]},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  cowboy
+                 ]},
+  {mod, { anekdar, []}},
+  {env, []}
+ ]}.

@@ -1,0 +1,2 @@
+run:    make & make start
+        go to localhost:9999
