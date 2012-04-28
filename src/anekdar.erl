@@ -11,6 +11,8 @@ start() ->
 start(_Type, _Args) ->
 	Dispatch = [
 		{'_', [
+			{[<<"sub">>, channel], sub_handler, []},
+			{[<<"pub">>, channel, <<"message">>, message], pub_handler, []},
 			{'_', default_handler, []}
 		]}
 	],
