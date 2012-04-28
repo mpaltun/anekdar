@@ -8,7 +8,7 @@ init({_Any, http}, Req, []) ->
 handle(Req, State) ->
     {Channel, Req2} = cowboy_http_req:binding(channel, Req),
     Pub_sub_mgr = pub_sub_manager:get_pid(),
-    Pub_sub_mgr ! {sub, Channel ,self()},
+    Pub_sub_mgr ! {sub, Channel, self()},
     receive
         {ok, Message} ->
             {ok, Req3} = cowboy_http_req:reply(200, [], Message, Req2)

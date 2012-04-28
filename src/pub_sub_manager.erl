@@ -8,18 +8,24 @@ get_pid() ->
         is_pid(Pid) ->
             Pid;
         true ->
-            NewPid = spawn(fun() -> pub_sub([])
+            NewPid = spawn(fun() -> pub_sub()
                            end),
             register(pub_sub_pid, NewPid),
             NewPid
     end.
     
 
-pub_sub(Subscribers) ->
+pub_sub() ->
+    Ets_pid = ets_manager:get_pid(),
     receive
         {sub, Channel, Pid} ->
-           pub_sub([Pid | Subscribers]);
+            Ets_pid ! {put, Channel, Pid},
+            pub_sub();
         {pub, Channel, Message} ->
-            lists:map(fun(Pid) -> Pid ! {ok, Message} end,Subscribers),
-            pub_sub([])
+            Ets_pid ! { get, Channel, self()},
+            receive
+                L ->
+                    lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L)
+            end,
+            pub_sub()
     end.
