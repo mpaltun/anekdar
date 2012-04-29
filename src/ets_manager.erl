@@ -25,6 +25,6 @@ loop() ->
             Results = ets:lookup(subs, Channel),
             Pid ! Results,
             % delete pids
-            %asdasdets:delete(Table, Channel),
+            ets:delete(subs, Channel),
             loop()
     end.
