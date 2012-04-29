@@ -9,8 +9,7 @@ handle(Req, State) ->
     {Channel, _} = cowboy_http_req:binding(channel, Req),
     {Message, _} = cowboy_http_req:binding(message, Req),
     
-    Pub_sub_mgr = pub_sub_manager:get_pid(),
-    Pub_sub_mgr ! {pub, Channel , Message},
+    pub_sub_manager:pub(Channel, Message),
     {ok, Req2} = cowboy_http_req:reply(200, [], <<"true">>, Req),
     {ok, Req2, State}.
 
