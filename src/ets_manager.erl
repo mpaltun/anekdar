@@ -8,23 +8,23 @@ get_pid() ->
         is_pid(Pid) ->
             Pid;
         true ->
-            Table = ets:new(subs, [public, bag]),
-            NewPid = spawn(fun() -> loop(Table)
+            NewPid = spawn(fun() -> ets:new(subs, [bag, named_table]),
+                                    loop()
                            end),
             register(ets_pid, NewPid),
             NewPid
     end.
     
 
-loop(Table) ->
+loop() ->
     receive
         {put, Channel, Pid} ->
-            ets:insert(Table, {Channel, Pid}),
-            loop(Table); 
+            ets:insert(subs, {Channel, Pid}),
+            loop(); 
         {get, Channel, Pid} ->
-            Results = ets:lookup(Table, Channel),
+            Results = ets:lookup(subs, Channel),
             Pid ! Results,
             % delete pids
-            ets:delete(Table, Channel),
-            loop(Table)
+            %asdasdets:delete(Table, Channel),
+            loop()
     end.
