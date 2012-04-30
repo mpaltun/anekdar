@@ -1,3 +1,4 @@
 deps
 ebin
 *.DS_Store
+erl_crash.dump
