@@ -10,7 +10,7 @@ handle(Req, State) ->
     {Message, _} = cowboy_http_req:binding(message, Req),
     
     pub_sub_manager:pub(Channel, Message),
-    {ok, Req2} = cowboy_http_req:reply(200, [], <<"true">>, Req),
+    {ok, Req2} = cowboy_http_req:reply(200, [{'Content-Type', <<"application/json">>}], <<"true">>, Req),
     {ok, Req2, State}.
 
 terminate(_Req, _State) ->

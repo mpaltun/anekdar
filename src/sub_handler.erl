@@ -13,21 +13,11 @@ handle(_Req, _State) ->
     exit(badarg).
 
 info({ok, Message}, Req, State) ->
-    {ok, Req2} = cowboy_http_req:reply(200, [], Message, Req),
+    {ok, Req2} = cowboy_http_req:reply(200, [{'Content-Type', <<"application/json">>}], Message, Req),
     {ok, Req2, State};
 
 info(_Message, Req, State) ->
     {loop, Req, State, hibernate}.
 
-%handle(Req, State) ->
-%    {Channel, Req2} = cowboy_http_req:binding(channel, Req),
-%    Pub_sub_mgr = pub_sub_manager:get_pid(),
-%    Pub_sub_mgr ! {sub, Channel, self()},
-%    receive
-%        {ok, Message} ->
-%            {ok, Req3} = cowboy_http_req:reply(200, [], Message, Req2)
-%    end,
-%    {ok, Req3, State}.
-%
 terminate(_Req, _State) ->
     ok.

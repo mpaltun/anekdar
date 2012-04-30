@@ -2,6 +2,6 @@ run:    make & make start
         go to localhost:9999
 
 subscribe   : GET /sub/{channel}
-publish     : GET /pub/{channel}/message/{message}
+publish     : GET /pub/{channel}/{message}
 
 Multiple channel supported.
