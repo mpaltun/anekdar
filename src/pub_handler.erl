@@ -7,11 +7,18 @@ init({_Any, http}, Req, []) ->
 
 handle(Req, State) ->
     {Channel, _} = cowboy_http_req:binding(channel, Req),
-    {Message, _} = cowboy_http_req:binding(message, Req),
-    
-    pub_sub_manager:pub(Channel, Message),
-    {ok, Req2} = cowboy_http_req:reply(200, [{'Content-Type', <<"application/json">>}], <<"true">>, Req),
-    {ok, Req2, State}.
+   
+    Reply = case cowboy_http_req:method(Req) of
+        {'POST', _} ->
+            {ok, PostMessage, _} = cowboy_http_req:body(Req),
+            pub_sub_manager:pub(Channel, PostMessage),
+            {ok, Req2} = cowboy_http_req:reply(200, [{'Content-Type', <<"application/json">>}], <<"true">>, Req),
+            Req2;
+        _ ->
+            {ok, Req2} = cowboy_http_req:reply(404, [], <<"Not Found">>, Req),
+            Req2
+        end,
+        {ok, Reply, State}.
 
 terminate(_Req, _State) ->
     ok.

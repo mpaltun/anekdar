@@ -12,7 +12,7 @@ start(_Type, _Args) ->
 	Dispatch = [
 		{'_', [
 			{[<<"sub">>, channel], sub_handler, []},
-			{[<<"pub">>, channel, message], pub_handler, []},
+			{[<<"pub">>, channel], pub_handler, []},
 			{'_', default_handler, []}
 		]}
 	],
