@@ -12,6 +12,6 @@ pub(Channel, Message) ->
     Ets_pid ! { get, Channel, self()},
     receive
         L ->
-            lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L)
-    end,
-    ok.
+            lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L),
+            length(L)
+    end.

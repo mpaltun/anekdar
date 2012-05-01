@@ -11,8 +11,10 @@ handle(Req, State) ->
     Reply = case cowboy_http_req:method(Req) of
         {'POST', _} ->
             {ok, PostMessage, _} = cowboy_http_req:body(Req),
-            pub_sub_manager:pub(Channel, PostMessage),
-            {ok, Req2} = cowboy_http_req:reply(200, [{'Content-Type', <<"application/json">>}], <<"true">>, Req),
+            Subs_Count = pub_sub_manager:pub(Channel, PostMessage),
+            {ok, Req2} = cowboy_http_req:reply(200,
+                [{'Content-Type', <<"application/json">>}],
+                    list_to_binary(integer_to_list(Subs_Count)), Req),
             Req2;
         _ ->
             {ok, Req2} = cowboy_http_req:reply(404, [], <<"Not Found">>, Req),
