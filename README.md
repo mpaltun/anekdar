@@ -4,9 +4,9 @@ Anekdar is an experimental REST based pub/sub server written in Erlang.
 
 ### Installing and running
 
-First of all you need to install Erlang OTP to your box. 
+First of all you need to install Erlang to your box. 
 
-On Ubuntu with ```aptitide```
+On Ubuntu with ```apt-get```
 
     apt-get install erlang
 
