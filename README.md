@@ -1,6 +1,6 @@
 ### What is anekdar
 
-Anekdar is an experimental REST based pub/sub server written in Erlang. 
+anekdar is an experimental comet based pub/sub server written in Erlang. 
 
 ### Installing and running
 
@@ -53,4 +53,4 @@ Thats it!
 
 ### License
 
-Anekdar is a open-source project and licenced with MIT. Feel free to fork and contribute.
+anekdar is a open-source project and licenced with MIT. Feel free to fork and contribute.
