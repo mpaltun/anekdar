@@ -10,8 +10,10 @@ handle(Req, State) ->
    
     Reply = case cowboy_http_req:method(Req) of
         {'POST', _} ->
-            {ok, PostMessage, _} = cowboy_http_req:body(Req),
-            Subs_Count = pub_sub_manager:pub(Channel, PostMessage),
+            {ok, Message, _} = cowboy_http_req:body(Req),
+            L = ets_server:get(Channel),
+            lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L),
+            Subs_Count = length(L),
             {ok, Req2} = cowboy_http_req:reply(200,
                 [{'Content-Type', <<"application/json">>}],
                     list_to_binary(integer_to_list(Subs_Count)), Req),

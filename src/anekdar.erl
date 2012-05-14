@@ -20,6 +20,7 @@ start(_Type, _Args) ->
 		cowboy_tcp_transport, [{port, 9999}],
 		cowboy_http_protocol, [{dispatch, Dispatch}]
 	),
+    ets_server:start_link(),
 	anekdar_sup:start_link().
 
 stop(_State) ->

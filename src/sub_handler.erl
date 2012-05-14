@@ -6,7 +6,7 @@
 
 init({_Any, http}, Req, _Opts) ->
     {Channel, Req2} = cowboy_http_req:binding(channel, Req),
-    pub_sub_manager:sub(Channel),
+    ets_server:put(Channel, self()),
     {loop, Req2, undefined_state, ?TIMEOUT, hibernate}.
 
 handle(_Req, _State) ->
