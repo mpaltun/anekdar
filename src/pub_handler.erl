@@ -9,18 +9,18 @@ handle(Req, State) ->
     {Channel, _} = cowboy_http_req:binding(channel, Req),
    
     Reply = case cowboy_http_req:method(Req) of
-        {'POST', _} ->
-            {ok, Message, _} = cowboy_http_req:body(Req),
+        {'POST', Req2} ->
+            {ok, Message, Req3} = cowboy_http_req:body(Req2),
             L = ets_server:get(Channel),
             lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L),
             Subs_Count = length(L),
-            {ok, Req2} = cowboy_http_req:reply(200,
+            {ok, Req4} = cowboy_http_req:reply(200,
                 [{'Content-Type', <<"application/json">>}],
-                    list_to_binary(integer_to_list(Subs_Count)), Req),
-            Req2;
-        _ ->
-            {ok, Req2} = cowboy_http_req:reply(404, [], <<"Not Found">>, Req),
-            Req2
+                    list_to_binary(integer_to_list(Subs_Count)), Req3),
+            Req4;
+        {_, Req2} ->
+            {ok, Req3} = cowboy_http_req:reply(404, [], <<"Not Found">>, Req2),
+            Req3
         end,
         {ok, Reply, State}.
 
