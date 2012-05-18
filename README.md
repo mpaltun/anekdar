@@ -18,7 +18,7 @@ After that
 
 Clone anekdar from git
 
-    git://github.com/rtgvd/anekdar.git
+    git clone git://github.com/rtgvd/anekdar.git
     cd anekdar
 
 Get dependencies and compile
