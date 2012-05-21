@@ -15,7 +15,7 @@ handle(Req, State) ->
             lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L),
             Subs_Count = length(L),
             {ok, Req4} = cowboy_http_req:reply(200,
-                [{'Content-Type', <<"application/json">>}],
+                [{'Content-Type', <<"application/json">>},{<<"Access-Control-Allow-Origin">>, <<"*">>}],
                     list_to_binary(integer_to_list(Subs_Count)), Req3),
             Req4;
         {_, Req2} ->
