@@ -8,12 +8,13 @@
          terminate/2,
          code_change/3]).
 
--export([start_link/0, start/0, get/1, put/2]).
+-export([start_link/0, start/0, get/1, put/2, remove/2]).
 
 -record(state, {}).
 
 get(Channel) -> gen_server:call(?MODULE, {get, Channel}).
 put(Channel, Pid) -> gen_server:call(?MODULE, {put, Channel, Pid}).
+remove(Channel, Pid) -> gen_server:cast(?MODULE, {remove, Channel, Pid}).
 
 
 start_link() ->
@@ -32,9 +33,11 @@ handle_call({put, Channel, Pid}, _From, State) ->
 
 handle_call({get, Channel}, _From, State) ->
     Results = ets:lookup(subs, Channel),
-    % delete pids
-    ets:delete(subs, Channel),
     {reply, Results, State}.
+
+handle_cast({remove, Channel, Pid}, State) ->
+    ets:delete_object(subs, {Channel, Pid}),
+    {noreply, State};
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
