@@ -12,6 +12,7 @@ start(_Type, _Args) ->
 	Dispatch = [
 		{'_', [
             {[], index_handler, []},
+            {[<<"ws">>], websocket_handler, []},
             {[<<"sub">>, channel], sub_handler, []},
             {[<<"pub">>, channel], pub_handler, []},
             {'_', default_handler, []}
