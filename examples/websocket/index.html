@@ -1,0 +1,20 @@
+<html>
+<head>
+	<script type="text/javascript" src="../../priv/anekdar-0.1.0.js">
+	</script>
+</head>
+<body>
+	Hi!
+	<div id="status"></div>
+	<script type="text/javascript">
+	function onMessage(text){
+		document.getElementById('status').innerHTML
+		= document.getElementById('status').innerHTML
+		+ "received: " + text + "<br/>";
+	}
+
+	anekdar = new Anekdar("localhost", 9999);
+	anekdar.connect(onMessage);
+	</script>
+</body>
+</html>
