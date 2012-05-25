@@ -12,7 +12,7 @@ handle(Req, State) ->
         {'POST', Req2} ->
             {ok, Message, Req3} = cowboy_http_req:body(Req2),
             L = ets_server:get(Channel),
-            lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L),
+            lists:map(fun({_, Pid}) -> Pid ! {ok, Channel, Message} end, L),
             Subs_Count = length(L),
             {ok, Req4} = cowboy_http_req:reply(200,
                 [{'Content-Type', <<"application/json">>},{<<"Access-Control-Allow-Origin">>, <<"*">>}],

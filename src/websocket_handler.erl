@@ -15,16 +15,16 @@ websocket_handle({text, <<"sub ", Channel/binary>>}, Req, State) ->
 websocket_handle({text, <<"pub ", Data/binary>>}, Req, State) ->
     [Channel, Message] = re:split(Data, <<" ">>, [{parts, 2}]),
     L = ets_server:get(Channel),
-    lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L),
+    lists:map(fun({_, Pid}) -> Pid ! {ok, Channel, Message} end, L),
     Subs_Count = length(L),
-    {reply, {text, list_to_binary(integer_to_list(Subs_Count))}, Req, State};
-websocket_handle({text, Msg}, Req, State) ->
-    {reply, {text, << "Undeterminated Message: ", Msg/binary >>}, Req, State};
+    {reply, {text, [<<"count ">>, Channel, " ", list_to_binary(integer_to_list(Subs_Count))]}, Req, State};
+websocket_handle({text, _Msg}, Req, State) ->
+    {reply, {text, <<"error undefined_action">>}, Req, State};
 websocket_handle(_Data, Req, State) ->
     {ok, Req, State}.
 
-websocket_info({ok, Msg}, Req, State) ->
-    {reply, {text, Msg}, Req, State};
+websocket_info({ok, Channel, Msg}, Req, State) ->
+    {reply, {text, [<<"pub ">>, Channel, <<" ">> , Msg]}, Req, State};
 websocket_info(_Info, Req, State) ->
     {ok, Req, State}.
 

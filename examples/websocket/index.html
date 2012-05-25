@@ -7,14 +7,21 @@
 	Hi!
 	<div id="status"></div>
 	<script type="text/javascript">
-	function onMessage(text){
+	function appendBody(text){
 		document.getElementById('status').innerHTML
 		= document.getElementById('status').innerHTML
 		+ "received: " + text + "<br/>";
 	}
 
 	anekdar = new Anekdar("localhost", 9999);
-	anekdar.connect(onMessage);
+	anekdar.connect(function() {
+		anekdar.subscribe('a', function(message) {
+			appendBody(' from channel a: ' + message);
+		});
+		anekdar.subscribe('b', function(message) {
+			appendBody(' from channel b: ' + message);
+		});
+	});
 	</script>
 </body>
 </html>
