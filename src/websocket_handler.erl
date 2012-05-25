@@ -11,7 +11,7 @@ websocket_init(_TransportName, Req, _Opts) ->
 
 websocket_handle({text, <<"sub ", Channel/binary>>}, Req, State) ->
     ets_server:put(Channel, self()),
-    {ok, Req, State};
+    {ok, Req, {Channel, State}};
 websocket_handle({text, <<"pub ", Data/binary>>}, Req, State) ->
     [Channel, Message] = re:split(Data, <<" ">>, [{parts, 2}]),
     L = ets_server:get(Channel),
@@ -28,5 +28,6 @@ websocket_info({ok, Channel, Msg}, Req, State) ->
 websocket_info(_Info, Req, State) ->
     {ok, Req, State}.
 
-websocket_terminate(_Reason, _Req, _State) ->
+websocket_terminate(_Reason, _Req, {Channel, _State}) ->
+    ets_server:remove(Channel, self()),
     ok.
