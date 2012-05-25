@@ -9,11 +9,11 @@ init({tcp, http}, _Req, _Opts) ->
 websocket_init(_TransportName, Req, _Opts) ->
     {ok, Req, undefined_state}.
 
-websocket_handle({text, <<"sub::", Channel/binary>>}, Req, State) ->
+websocket_handle({text, <<"sub ", Channel/binary>>}, Req, State) ->
     ets_server:put(Channel, self()),
     {ok, Req, State};
-websocket_handle({text, <<"pub::", Data/binary>>}, Req, State) ->
-    [Channel, Message] = binary:split(Data, <<"::">>),
+websocket_handle({text, <<"pub ", Data/binary>>}, Req, State) ->
+    [Channel, Message] = re:split(Data, <<" ">>, [{parts, 2}]),
     L = ets_server:get(Channel),
     lists:map(fun({_, Pid}) -> Pid ! {ok, Message} end, L),
     Subs_Count = length(L),

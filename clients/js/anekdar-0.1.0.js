@@ -33,9 +33,9 @@ Anekdar.prototype = {
 		}
 	},
 	subscribe : function(Channel) {
-		this.ws.send("sub::" + Channel);
+		this.ws.send("sub " + Channel);
 	},
 	publish : function(Channel, Message) {
-		this.ws.send("pub::" + Channel + "::" + JSON.stringify(Message));
+		this.ws.send("pub " + Channel + " " + JSON.stringify(Message));
 	}
 }
