@@ -22,6 +22,10 @@ start(_Type, _Args) ->
 		cowboy_tcp_transport, [{port, 9999}],
 		cowboy_http_protocol, [{dispatch, Dispatch}]
 	),
+    cowboy:start_listener(my_tcp_listener, 100,
+        cowboy_tcp_transport, [{port, 9998}],
+        tcp_handler, []
+    ),
     ets_server:start_link(),
 	anekdar_sup:start_link().
 
