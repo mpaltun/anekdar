@@ -16,28 +16,30 @@ init(ListenerPid, Socket, Transport, _Options) ->
 
 loop(Socket, Transport) ->
     receive
-        {tcp, Socket, <<"sub ", Channel/binary>>} -> 
-            % clean \r\n
-            Ch = remove_rn_from_end(Channel),
-            ets_server:put(Ch, self());
-        {tcp, Socket, <<"pub ", Data/binary>>} ->
-            D = remove_rn_from_end(Data),
-            [Channel, Message] = re:split(D, <<" ">>, [{parts, 2}]),
-            L = ets_server:get(Channel),
-            lists:map(fun({_, Pid}) -> Pid ! {ok, Channel, Message} end, L),
-            Subs_Count = length(L),
-            Transport:send(Socket, 
-                [<<"count ">>, Channel, " ", list_to_binary(integer_to_list(Subs_Count)), <<"\n">>]);
-        {ok, Channel, Msg} ->
-            Transport:send(Socket, [<<"pub ">>, Channel, <<" ">> , Msg, <<"\n">>]);
+        {tcp, Socket, Data} ->
+            Parsed_data = anekdar_protocol:parse(Data),
+            response(Parsed_data, Transport, Socket);
+        {ok, Channel, Message} ->
+            Response = anekdar_protocol:sub_response(Channel, Message, "\r\n"),
+            Transport:send(Socket, Response);
         _ ->
             ok
     end,
     loop(Socket, Transport).
 
 stop(_State) ->
-  ok.
+    erlang:display("tcp disconnected"),
+    ok.
 
-% internal api
-remove_rn_from_end(Binary) ->
-    binary:part(Binary, {0, byte_size(Binary)-2}).
+response({sub, Channel}, _Transport, _Socket) ->
+    pub_sub_manager:sub(clean_crlf(Channel));
+response({pub, Channel, Message}, Transport, Socket) ->
+    Count = pub_sub_manager:pub(Channel, clean_crlf(Message)),
+    Resp = anekdar_protocol:pub_response(Count, "\r\n"),
+    Transport:send(Socket, Resp);
+response(_, Transport, Socket) ->
+    Resp = anekdar_protocol:error_response(<<"unrecognized command\r\n">>),
+    Transport:send(Socket, Resp).
+
+clean_crlf(Binary) ->
+    binary:part(Binary, {0, byte_size(Binary) - 2}).

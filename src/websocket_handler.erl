@@ -9,25 +9,29 @@ init({tcp, http}, _Req, _Opts) ->
 websocket_init(_TransportName, Req, _Opts) ->
     {ok, Req, undefined_state}.
 
-websocket_handle({text, <<"sub ", Channel/binary>>}, Req, State) ->
-    ets_server:put(Channel, self()),
-    {ok, Req, {Channel, State}};
-websocket_handle({text, <<"pub ", Data/binary>>}, Req, State) ->
-    [Channel, Message] = re:split(Data, <<" ">>, [{parts, 2}]),
-    L = ets_server:get(Channel),
-    lists:map(fun({_, Pid}) -> Pid ! {ok, Channel, Message} end, L),
-    Subs_Count = length(L),
-    {reply, {text, [<<"count ">>, Channel, " ", list_to_binary(integer_to_list(Subs_Count))]}, Req, State};
-websocket_handle({text, _Msg}, Req, State) ->
-    {reply, {text, <<"error undefined_action">>}, Req, State};
+websocket_handle({text, Data}, Req, State) ->
+    Parsed_data = anekdar_protocol:parse(Data),
+    response(Parsed_data, Req, State);
 websocket_handle(_Data, Req, State) ->
     {ok, Req, State}.
 
-websocket_info({ok, Channel, Msg}, Req, State) ->
-    {reply, {text, [<<"pub ">>, Channel, <<" ">> , Msg]}, Req, State};
+websocket_info({ok, Channel, Message}, Req, State) ->
+    Response = anekdar_protocol:sub_response(Channel, Message, ""),
+    {reply, {text, Response}, Req, State};
 websocket_info(_Info, Req, State) ->
     {ok, Req, State}.
 
 websocket_terminate(_Reason, _Req, {Channel, _State}) ->
-    ets_server:remove(Channel, self()),
+    pub_sub_manager:unsub(Channel),
     ok.
+
+response({sub, Channel}, Req, State) ->
+    pub_sub_manager:sub(Channel),
+    {ok, Req, {Channel, State}};
+response({pub, Channel, Message}, Req, State) ->
+    Count = pub_sub_manager:pub(Channel, Message),
+    Resp = anekdar_protocol:pub_response(Count, ""),
+    {reply, {text, Resp}, Req, State};
+response(_, Req, State) ->
+    Resp = anekdar_protocol:error_response(<<"unrecognized command">>),
+    {reply, {text, Resp}, Req, State}.
