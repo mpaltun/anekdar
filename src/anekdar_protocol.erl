@@ -30,5 +30,6 @@ parse(<<?COMMAND_PUB, ?DELIMITER, Data/binary>>) ->
         true ->
             {error, <<"message or channel missed">>} 
     end;
-parse(_) ->
+parse(Any) ->
+    erlang:display(binary_to_atom(<<"unrecognized message: ", Any/binary>>, utf8)),
     {error}.
