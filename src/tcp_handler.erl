@@ -20,28 +20,36 @@ loop(Socket, Transport) ->
             response(Parsed_data, Transport, Socket);
         {ok, Channel, Message} ->
             Response = anekdar_protocol:sub_response(Channel, Message, "\r\n"),
-            Transport:send(Socket, Response);
+            Transport:send(Socket, Response),
+            loop(Socket, Transport);
         _ ->
             ok
-    end,
-    loop(Socket, Transport).
+    end.
 
 stop(_State) ->
     erlang:display("tcp disconnected"),
     ok.
 
-response({sub, Channel}, _Transport, _Socket) ->
-    pub_sub_manager:sub(clean_crlf(Channel));
+response({sub, Channel}, Transport, Socket) ->
+    pub_sub_manager:sub(clean_crlf(Channel)),
+    loop(Socket, Transport);
 response({pub, Channel, Message}, Transport, Socket) ->
     Count = pub_sub_manager:pub(Channel, clean_crlf(Message)),
     Resp = anekdar_protocol:pub_response(Count, "\r\n"),
-    Transport:send(Socket, Resp);
+    Transport:send(Socket, Resp),
+    loop(Socket, Transport);
 response({error, Why}, Transport, Socket) ->
     Resp = anekdar_protocol:error_response(<<Why/binary, "\r\n">>),
-    Transport:send(Socket, Resp);
+    Transport:send(Socket, Resp),
+    loop(Socket, Transport);
+response({quit}, Transport, Socket) ->
+    Resp = anekdar_protocol:quit_response(<<"\r\n">>),
+    Transport:send(Socket, Resp),
+    Transport:close(Socket);
 response(_, Transport, Socket) ->
     Resp = anekdar_protocol:error_response(<<"unrecognized command\r\n">>),
-    Transport:send(Socket, Resp).
+    Transport:send(Socket, Resp),
+    loop(Socket, Transport).
 
 clean_crlf(Binary) ->
     binary:part(Binary, {0, byte_size(Binary) - 2}).
