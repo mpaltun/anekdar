@@ -11,7 +11,6 @@ start_link(ListenerPid, Socket, Transport, Options) ->
 init(ListenerPid, Socket, Transport, _Options) ->
   ok = Transport:setopts(Socket, [{packet, line}, binary, {active, true}]),
   cowboy:accept_ack(ListenerPid), 
-  ok = Transport:send(Socket, <<"Welcome to anekdar tcpserver\n">>),
   loop(Socket, Transport).
 
 loop(Socket, Transport) ->
