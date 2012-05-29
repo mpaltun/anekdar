@@ -22,7 +22,13 @@ error_response(Why) ->
 parse(<<?COMMAND_SUB, ?DELIMITER, Channel/binary>>) ->
     {sub, Channel}; 
 parse(<<?COMMAND_PUB, ?DELIMITER, Data/binary>>) ->
-    [Channel, Message] = re:split(Data, ?DELIMITER, [{parts, 2}]),
-    {pub, Channel, Message}; 
+    L = re:split(Data, ?DELIMITER, [{parts, 2}]),
+    if
+        length(L) =:= 2 ->
+            [Channel, Message] = L,
+            {pub, Channel, Message};
+        true ->
+            {error, <<"message or channel missed">>} 
+    end;
 parse(_) ->
     {error}.

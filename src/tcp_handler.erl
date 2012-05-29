@@ -37,6 +37,9 @@ response({pub, Channel, Message}, Transport, Socket) ->
     Count = pub_sub_manager:pub(Channel, clean_crlf(Message)),
     Resp = anekdar_protocol:pub_response(Count, "\r\n"),
     Transport:send(Socket, Resp);
+response({error, Why}, Transport, Socket) ->
+    Resp = anekdar_protocol:error_response(<<Why/binary, "\r\n">>),
+    Transport:send(Socket, Resp);
 response(_, Transport, Socket) ->
     Resp = anekdar_protocol:error_response(<<"unrecognized command\r\n">>),
     Transport:send(Socket, Resp).
