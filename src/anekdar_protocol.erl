@@ -1,7 +1,7 @@
 -module(anekdar_protocol).
 -author('Mustafa Paltun <mpaltun@gmail.com>').
 
--export([parse/1, sub_response/3, pub_response/2, error_response/1, quit_response/1]).
+-export([parse/1, sub_response/3, pub_response/2, error_response/1, quit_response/1, ping_response/1]).
 
 -define(DELIMITER, " ").
 -define(ERROR, "-").
@@ -11,12 +11,16 @@
 -define(COMMAND_SUB, "sub").
 -define(COMMAND_PUB, "pub").
 -define(COMMAND_QUIT, "quit").
+-define(COMMAND_PING, "ping").
 
 sub_response(Channel, Message, Crlf) ->
     [?SUCCESS_STR, Channel, ?DELIMITER, Message, Crlf].
 
 pub_response(Count, Crlf) ->
     [?SUCCESS_INT, list_to_binary(integer_to_list(Count)), Crlf].
+
+ping_response(Crlf) ->
+    [?SUCCESS_STR, <<"PONG">>, Crlf].
 
 error_response(Why) ->
     [?ERROR, Why].
@@ -36,6 +40,8 @@ parse(<<?COMMAND_PUB, ?DELIMITER, Data/binary>>) ->
         true ->
             {error, <<"message or channel missed">>} 
     end;
+parse(<<?COMMAND_PING, _Clrf/binary>>) ->
+    {ping};
 parse(<<?COMMAND_QUIT, _Clrf/binary>>) ->
     {quit};
 parse(Any) ->

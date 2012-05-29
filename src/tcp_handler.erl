@@ -42,6 +42,10 @@ response({error, Why}, Transport, Socket) ->
     Resp = anekdar_protocol:error_response(<<Why/binary, "\r\n">>),
     Transport:send(Socket, Resp),
     loop(Socket, Transport);
+response({ping}, Transport, Socket) ->
+    Resp = anekdar_protocol:ping_response(<<"\r\n">>),
+    Transport:send(Socket, Resp),
+    loop(Socket, Transport);
 response({quit}, Transport, Socket) ->
     Resp = anekdar_protocol:quit_response(<<"\r\n">>),
     Transport:send(Socket, Resp),
