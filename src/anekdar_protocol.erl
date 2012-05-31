@@ -20,7 +20,7 @@ pub_response(Count, Crlf) ->
     [?SUCCESS_INT, list_to_binary(integer_to_list(Count)), Crlf].
 
 ping_response(Crlf) ->
-    [?SUCCESS_STR, <<"PONG">>, Crlf].
+    [?SUCCESS_STR, <<"pong">>, Crlf].
 
 error_response(Why) ->
     [?ERROR, Why].
