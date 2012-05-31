@@ -23,8 +23,7 @@ loop(Socket, Transport) ->
             Transport:send(Socket, Response),
             loop(Socket, Transport);
         _ ->
-            erlang:display("client disconnected"),
-            ok
+            erlang:display("client disconnected")
     end.
 
 stop(_State) ->

@@ -18,8 +18,10 @@ class anekdar:
         #data = self.socket.recv(BUFFER_SIZE)
         # to be implemented
         pass
-    def pub(self, Channel, Message):
-        self.socket.send("pub" + self.DELIMITER + Channel + self.DELIMITER + Message + self.CRLF)
+    def pub(self, channel, message):
+        self.socket.send("pub" + self.DELIMITER + channel + self.DELIMITER + message + self.CRLF)
+        data = self.socket.recv(self.BUFFER_SIZE)
+        return data[:-len(self.CRLF)]
 
     def disconnect(self):
         self.socket.close()

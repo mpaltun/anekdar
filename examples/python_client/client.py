@@ -7,10 +7,10 @@ client_path = os.path.abspath('../../clients/py')
 sys.path.append(client_path)
 from anekdar import anekdar
 
-anekdar = anekdar("localhost", 9998)
 now = time()
-for i in range(1000000):
-	anekdar.pub('a', str(i));
+for i in range(100):
+    a = anekdar("localhost", 9998)
+    print str(i) + " " + a.pub('a', str(i))
+    a.disconnect()
 
-print "1000000 message published in " + str(time() - now) + ' seconds'
-anekdar.disconnect()
+print "100 message published in " + str(time() - now) + ' seconds'
