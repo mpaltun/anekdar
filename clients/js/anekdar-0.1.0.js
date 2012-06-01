@@ -1,7 +1,7 @@
 function Anekdar(server, port) {
 	this.server = server;
 	this.port = port;
-	this.parser = new Anekdar_message_parser();
+	this.protocol = new Anekdar_protocol();
 	this.callbacks = {};
 	self = this;
 	this.connect = function(callback) {
@@ -16,24 +16,35 @@ function Anekdar(server, port) {
 				console.info("websocket connection established");
 				callback();
 			};
-			parser = this.parser;
 			ws.onmessage = function (evt) {
-				data = split(evt.data, parser.delimiter, 3);
-				command = data[0];
-				channel = data[1];
-				message = data[2];
-				switch(command) {
-					case parser.command.publish:
-						self.callbacks[channel](message);
-					break;
-					case parser.command.subscribe:
-						// to be implemented
-					break;
-					case parser.command.count:
-						// to be implemented
-					break;
+				msg = evt.data;
+				type = msg.charAt(0);
+				rest = msg.substring(1);
+				switch(type)
+				{
+					case self.protocol.reply.success_int:
+						// publish response
+						// pass count as param
+						self.current_callback(rest);
+						break;
+					case self.protocol.reply.success_str:
+						if (rest.indexOf(self.protocol.delimiter) == -1) {
+							// pong
+							self.current_callback(rest);
+						}
+						else {
+							// subscribe
+							data = split(rest, self.protocol.delimiter, 2);
+							channel = data[0];
+							message = data[1];
+							self.callbacks[channel](message);
+						}
+						break;
+					case self.protocol.reply.error:
+						console.error("error occurred: " + rest)
+						break;
 					default:
-						console.error('unknown message type: ' + command);
+						console.error('unknown message type: ' + type);
 					break;
 				}
 			};
@@ -52,18 +63,31 @@ function Anekdar(server, port) {
 	};
 	this.subscribe = function(channel, callback) {
 		self.callbacks[channel] = callback;
-		self.ws.send("sub " + channel);
+		self.ws.send(self.protocol.command.subscribe + self.protocol.delimiter + channel);
 	};
-	this.publish = function(channel, message) {
-		self.ws.send("pub " + channel + " " + JSON.stringify(message));
+	this.publish = function(channel, message, callback) {
+		self.current_callback = callback;
+		self.ws.send(self.protocol.command.publish + self.protocol.delimiter + channel + self.protocol.delimiter + message);
+	}
+	this.ping = function(callback) {
+		self.current_callback = callback;
+		self.ws.send(self.protocol.command.ping);
+	}
+	this.disconnect = function () {
+		self.ws.send(self.protocol.command.quit);
 	}
 }
 
-function Anekdar_message_parser() {
+function Anekdar_protocol() {
 	this.command = {};
 	this.command.publish = 'pub';
 	this.command.subscribe = 'sub';
-	this.command.count = 'count';
+	this.command.ping = 'ping';
+	this.command.quit = 'quit';
+	this.reply = {};
+	this.reply.success_str = '+';
+	this.reply.success_int = ':';
+	this.reply.error = '-';
 	this.delimiter = ' ';
 }
 
