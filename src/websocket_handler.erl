@@ -23,8 +23,9 @@ websocket_info(_Info, Req, State) ->
 
 websocket_terminate(_Reason, _Req, {Channel, _State}) ->
     pub_sub_manager:unsub(Channel),
-    ok.
-
+    ok;
+websocket_terminate(_Reason, _Req, _State) ->
+   ok. 
 response({sub, Channel}, Req, State) ->
     pub_sub_manager:sub(Channel),
     {ok, Req, {Channel, State}};
@@ -32,6 +33,12 @@ response({pub, Channel, Message}, Req, State) ->
     Count = pub_sub_manager:pub(Channel, Message),
     Resp = anekdar_protocol:pub_response(Count, ""),
     {reply, {text, Resp}, Req, State};
+response({ping}, Req, State) ->
+    Resp = anekdar_protocol:ping_response(<<"">>),
+    {reply, {text, Resp}, Req, State};
+response({quit}, Req, State) ->
+    _Resp = anekdar_protocol:quit_response(<<"">>),
+    {shutdown, Req, State};
 response(_, Req, State) ->
     Resp = anekdar_protocol:error_response(<<"unrecognized command">>),
     {reply, {text, Resp}, Req, State}.
