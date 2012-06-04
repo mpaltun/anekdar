@@ -9,8 +9,8 @@ start_link(ListenerPid, Socket, Transport, Options) ->
   {ok, Pid}.
 
 init(ListenerPid, Socket, Transport, _Options) ->
-  ok = Transport:setopts(Socket, [{packet, line}, binary, {active, true}]),
   cowboy:accept_ack(ListenerPid), 
+  ok = Transport:setopts(Socket, [{packet, line}, binary, {active, true}]),
   loop(Socket, Transport).
 
 loop(Socket, Transport) ->
@@ -22,8 +22,12 @@ loop(Socket, Transport) ->
             Response = anekdar_protocol:sub_response(Channel, Message, "\r\n"),
             Transport:send(Socket, Response),
             loop(Socket, Transport);
+        {tcp_closed, Socket} ->
+            terminate(Socket, Transport);
         _ ->
-            erlang:display("client disconnected")
+            erlang:display(unrecognized_message),
+            terminate(Socket, Transport)
+
     end.
 
 stop(_State) ->
@@ -48,11 +52,14 @@ response({ping}, Transport, Socket) ->
 response({quit}, Transport, Socket) ->
     Resp = anekdar_protocol:quit_response(<<"\r\n">>),
     Transport:send(Socket, Resp),
-    Transport:close(Socket);
+    terminate(Socket, Transport);
 response(_, Transport, Socket) ->
     Resp = anekdar_protocol:error_response(<<"unrecognized command\r\n">>),
     Transport:send(Socket, Resp),
     loop(Socket, Transport).
 
+terminate(Socket, Transport) ->
+    Transport:close(Socket),
+    ok.
 clean_crlf(Binary) ->
     binary:part(Binary, {0, byte_size(Binary) - 2}).
