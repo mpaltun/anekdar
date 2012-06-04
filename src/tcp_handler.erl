@@ -36,6 +36,11 @@ stop(_State) ->
 response({sub, Channel}, Transport, Socket) ->
     pub_sub_manager:sub(clean_crlf(Channel)),
     loop(Socket, Transport);
+response({unsub, Channel}, Transport, Socket) ->
+    pub_sub_manager:unsub(clean_crlf(Channel)),
+    Resp = anekdar_protocol:unsub_response("\r\n"),
+    Transport:send(Socket, Resp),
+    loop(Socket, Transport);
 response({pub, Channel, Message}, Transport, Socket) ->
     Count = pub_sub_manager:pub(Channel, clean_crlf(Message)),
     Resp = anekdar_protocol:pub_response(Count, "\r\n"),
