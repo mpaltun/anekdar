@@ -33,6 +33,10 @@ response({pub, Channel, Message}, Req, State) ->
     Count = pub_sub_manager:pub(Channel, Message),
     Resp = anekdar_protocol:pub_response(Count, ""),
     {reply, {text, Resp}, Req, State};
+response({unsub, Channel}, Req, State) ->
+    pub_sub_manager:unsub(Channel),
+    Resp = anekdar_protocol:unsub_response(""),
+    {reply, {text, Resp}, Req, State};
 response({ping}, Req, State) ->
     Resp = anekdar_protocol:ping_response(<<"">>),
     {reply, {text, Resp}, Req, State};
