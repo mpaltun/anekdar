@@ -14,12 +14,12 @@
 	}
 	anekdar = new Anekdar("localhost", 9999);
 	anekdar.connect(function() {
-		/*(anekdar.subscribe('a', function(message) {
-		appendBody(' from channel a: ' + message);
+		anekdar.subscribe('a', function(message) {
+			appendBody(' from channel a: ' + message);
 		});
 		anekdar.subscribe('b', function(message) {
-		appendBody(' from channel b: ' + message);
-		});*/
+			appendBody(' from channel b: ' + message);
+		});
 		for (var i=0; i < 100; i++) {
 			/*anekdar.publish('a', i, function(count) {
 				appendBody('published to ' + count + ' clients');

@@ -68,11 +68,14 @@ function Anekdar(server, port) {
 	this.publish = function(channel, message, callback) {
 		self.current_callback = callback;
 		self.ws.send(self.protocol.command.publish + self.protocol.delimiter + channel + self.protocol.delimiter + message);
-	}
+	};
+	this.unsubscribe = function (channel) {
+		self.ws.send(self.protocol.command.unsubscribe + self.protocol.delimiter + channel);
+	};
 	this.ping = function(callback) {
 		self.current_callback = callback;
 		self.ws.send(self.protocol.command.ping);
-	}
+	};
 	this.disconnect = function () {
 		self.ws.send(self.protocol.command.quit);
 	}
@@ -82,6 +85,7 @@ function Anekdar_protocol() {
 	this.command = {};
 	this.command.publish = 'pub';
 	this.command.subscribe = 'sub';
+	this.command.unsubscribe = 'unsub';
 	this.command.ping = 'ping';
 	this.command.quit = 'quit';
 	this.reply = {};
