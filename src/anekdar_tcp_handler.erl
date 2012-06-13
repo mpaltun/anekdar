@@ -51,11 +51,15 @@ handle_request(<<?COMMAND_PUB, ?DELIMITER, Data/binary>>, State) ->
         true ->
             handle_warn(<<"message or channel missed">>, State)
     end;
+
 handle_request(<<?COMMAND_UNSUB, ?DELIMITER, Channel/binary>>, State) ->
     handle_unsub(clean_crlf(Channel), State);
 
 handle_request(<<?COMMAND_PING, ?CRLF>>, State) ->
     handle_ping(State);
+
+handle_request(<<?COMMAND_INFO, ?CRLF>>, State) ->
+    handle_info(State);
 
 handle_request(<<?COMMAND_QUIT, ?CRLF>>, State) ->
     handle_quit(State);
@@ -98,6 +102,17 @@ handle_ping(State=#state{socket=Socket,
     Transport:send(Socket, Response),
     wait_request(State).
 
+handle_info(State=#state{socket=Socket, 
+        transport=Transport, channels=Channels}) ->
+    {ok, Version} = application:get_key(anekdar, vsn),
+    {Uptime, _} = erlang:statistics(wall_clock),
+    [{total, Memory} | _] = erlang:memory(),
+    ChannelCount = length(Channels),
+    Response = response_info(Version, Uptime, Memory, ChannelCount),
+    Transport:send(Socket, Response),
+    wait_request(State).
+
+
 handle_quit(State=#state{socket=Socket, 
         transport=Transport, channels=_Channels}) ->
     Resp = response_quit(),
@@ -113,7 +128,7 @@ response_unsub() ->
     [?SUCCESS_STR, <<"ok">>, ?CRLF].
 
 response_pub(Count) ->
-    [?SUCCESS_INT, list_to_binary(integer_to_list(Count)), ?CRLF].
+    [?SUCCESS_INT, int_to_binary(Count), ?CRLF].
 
 response_error(Message) ->
     [?ERROR, Message, ?CRLF].
@@ -121,11 +136,23 @@ response_error(Message) ->
 response_ping() ->
     [?SUCCESS_STR, <<"pong">>, ?CRLF].
 
+response_info(Version, Uptime,  Memory, ChannelCount) ->
+    [?SUCCESS_STR,
+        <<"version ">>, Version,
+        <<" uptime ">>, int_to_binary(Uptime),
+        <<"ms used_memory ">>, int_to_binary(Memory),
+        <<"bytes your_channels ">>, int_to_binary(ChannelCount),
+        ?CRLF].
+
+
 response_quit() ->
     [?SUCCESS_STR, <<"bye">>, ?CRLF].
 
 clean_crlf(Binary) ->
     binary:part(Binary, {0, byte_size(Binary) - 2}).
+
+int_to_binary(Int) ->
+    list_to_binary(integer_to_list(Int)).
 
 terminate(#state{socket=Socket, 
         transport=Transport, channels=Channels}) ->

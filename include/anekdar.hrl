@@ -9,3 +9,4 @@
 -define(COMMAND_PUB, "pub").
 -define(COMMAND_QUIT, "quit").
 -define(COMMAND_PING, "ping").
+-define(COMMAND_INFO, "info").
