@@ -24,7 +24,7 @@ start(_Type, _Args) ->
 	),
     cowboy:start_listener(my_tcp_listener, 100,
         cowboy_tcp_transport, [{port, 9998}],
-        tcp_handler, []
+        anekdar_tcp_handler.erl, []
     ),
     ets_server:start_link(),
 	anekdar_sup:start_link().
