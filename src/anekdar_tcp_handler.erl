@@ -1,4 +1,4 @@
--module(anekdar_tcp_handler.erl).
+-module(anekdar_tcp_handler).
 -author('Mustafa Paltun <mpaltun@gmail.com>').
 
 -export([start_link/4, stop/1]).
