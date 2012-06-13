@@ -13,7 +13,7 @@ handle(_Req, _State) ->
     exit(badarg).
 
 info({ok, _Channel, Message}, Req, State) ->
-    {ok, Req2} = cowboy_http_req:reply(200, [{'Content-Type', <<"application/json">>},{<<"Access-Control-Allow-Origin">>, <<"*">>}], Message, Req),
+    {ok, Req2} = cowboy_http_req:reply(200, [{'Content-Type', <<"text/plain">>}], Message, Req),
     {ok, Req2, State};
 
 info(_Message, Req, State) ->
