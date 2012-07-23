@@ -2,6 +2,9 @@
 <head>
 	<script type="text/javascript" src="../../clients/js/anekdar-0.1.0.js">
 	</script>
+		<script
+src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
+</script>
 </head>
 <body>
 	Hi!
@@ -20,12 +23,9 @@
 		anekdar.subscribe('b', function(message) {
 			appendBody(' from channel b: ' + message);
 		});
-		for (var i=0; i < 100; i++) {
-			/*anekdar.publish('a', i, function(count) {
+		for (var i=0; i < 1; i++) {
+			anekdar.publish('a', i, function(count) {
 				appendBody('published to ' + count + ' clients');
-			});*/
-			anekdar.ping(function(response) {
-				appendBody('ping: ' + response);
 			});
 		};
 	});

@@ -2,9 +2,14 @@ function Anekdar(server, port) {
 	this.server = server;
 	this.port = port;
 	this.protocol = new Anekdar_protocol();
-	this.callbacks = {};
-	self = this;
-	this.connect = function(callback) {
+	this.callbacks = {
+		publish : [],
+		subscribe: []
+	};
+}
+
+Anekdar.prototype = {
+	connect : function(callback) {
 		if ("MozWebSocket" in window) {
 			WebSocket = MozWebSocket;
 		}
@@ -16,6 +21,7 @@ function Anekdar(server, port) {
 				console.info("websocket connection established");
 				callback();
 			};
+			self = this;
 			ws.onmessage = function (evt) {
 				msg = evt.data;
 				type = msg.charAt(0);
@@ -25,20 +31,15 @@ function Anekdar(server, port) {
 					case self.protocol.reply.success_int:
 						// publish response
 						// pass count as param
-						self.current_callback(rest);
+						c = self.callbacks.publish.shift();
+						c(rest);
 						break;
 					case self.protocol.reply.success_str:
-						if (rest.indexOf(self.protocol.delimiter) == -1) {
-							// pong
-							self.current_callback(rest);
-						}
-						else {
-							// subscribe
-							data = split(rest, self.protocol.delimiter, 2);
-							channel = data[0];
-							message = data[1];
-							self.callbacks[channel](message);
-						}
+						// subscribe
+						data = split(rest, self.protocol.delimiter, 2);
+						channel = data[0];
+						message = data[1];
+						self.callbacks.subscribe[channel](message);
 						break;
 					case self.protocol.reply.error:
 						console.error("error occurred: " + rest)
@@ -48,38 +49,33 @@ function Anekdar(server, port) {
 					break;
 				}
 			};
-
 			ws.onclose = function() {
 				// websocket was closed
 				console.info("websocket connection closed");
 			};
-			self.ws = ws;
+			this.ws = ws;
 		}
 		else {
 			// websocket not supported
 			// TODO: long polling stuff will be implemented here
 			console.info("websocket is not supported");
 		}
-	};
-	this.subscribe = function(channel, callback) {
-		self.callbacks[channel] = callback;
-		self.ws.send(self.protocol.command.subscribe + self.protocol.delimiter + channel);
-	};
-	this.publish = function(channel, message, callback) {
-		self.current_callback = callback;
-		self.ws.send(self.protocol.command.publish + self.protocol.delimiter + channel + self.protocol.delimiter + message);
-	};
-	this.unsubscribe = function (channel) {
-		self.ws.send(self.protocol.command.unsubscribe + self.protocol.delimiter + channel);
-	};
-	this.ping = function(callback) {
-		self.current_callback = callback;
-		self.ws.send(self.protocol.command.ping);
-	};
-	this.disconnect = function () {
-		self.ws.send(self.protocol.command.quit);
+	},
+	subscribe : function(channel, callback) {
+		this.callbacks.subscribe[channel] = callback;
+		this.ws.send(this.protocol.command.subscribe + this.protocol.delimiter + channel);
+	},
+	publish : function(channel, message, callback) {
+		this.callbacks.publish.push(callback);
+		this.ws.send(this.protocol.command.publish + this.protocol.delimiter + channel + this.protocol.delimiter + message);
+	},
+	unsubscribe : function (channel) {
+		this.ws.send(this.protocol.command.unsubscribe + this.protocol.delimiter + channel);
+	},
+	disconnect : function () {
+		this.ws.send(this.protocol.command.quit);
 	}
-}
+};
 
 function Anekdar_protocol() {
 	this.command = {};
