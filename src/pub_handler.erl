@@ -11,9 +11,7 @@ handle(Req, State) ->
     Reply = case cowboy_http_req:method(Req) of
         {'POST', Req2} ->
             {ok, Message, Req3} = cowboy_http_req:body(Req2),
-            L = ets_server:get(Channel),
-            lists:map(fun({_, Pid}) -> Pid ! {ok, Channel, Message} end, L),
-            Subs_Count = length(L),
+            Subs_Count = pub_sub_manager:pub(Channel, Message),
             {ok, Req4} = cowboy_http_req:reply(200,
                 [{'Content-Type', <<"text/plain">>},{<<"Access-Control-Allow-Origin">>, <<"*">>}],
                     list_to_binary(integer_to_list(Subs_Count)), Req3),

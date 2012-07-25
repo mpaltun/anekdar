@@ -6,7 +6,7 @@
 
 init({_Any, http}, Req, _Opts) ->
     {Channel, Req2} = cowboy_http_req:binding(channel, Req),
-    ets_server:put(Channel, self()),
+    pub_sub_manager:sub(Channel),
     {loop, Req2, {undefined_state, Channel}, ?TIMEOUT, hibernate}.
 
 handle(_Req, _State) ->
@@ -20,5 +20,5 @@ info(_Message, Req, State) ->
     {loop, Req, State, hibernate}.
 
 terminate(_Req, {_State, Channel}) ->
-    ets_server:remove(Channel, self()),
+    pub_sub_manager:unsub(Channel),
     ok.
