@@ -27,6 +27,7 @@ start(_Type, _Args) ->
         anekdar_tcp_handler, []
     ),
     ets_server:start_link(),
+    stats_server:start_link(),
 	anekdar_sup:start_link().
 
 stop(_State) ->

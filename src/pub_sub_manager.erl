@@ -4,7 +4,8 @@
 -export([sub/1, pub/2, unsub/1]).
 
 sub(Channel) ->
-    ets_server:put(Channel, self()).
+    ets_server:put(Channel, self()),
+    stats_server:incr(Channel).
 
 pub(Channel, Message) ->
     L = ets_server:get(Channel),
@@ -13,4 +14,5 @@ pub(Channel, Message) ->
     length(L).
 
 unsub(Channel) ->
-    ets_server:remove(Channel, self()).
+    ets_server:remove(Channel, self()),
+    stats_server:decr(Channel).
