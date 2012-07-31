@@ -64,6 +64,9 @@ incr(Channel, []) ->
 incr(Channel, _) ->
     ets:update_counter(stats, Channel, 1).
 
+decr(Channel, 1) ->
+    ets:delete(stats, Channel);
+
 decr(Channel, Count) when Count > 0 ->
     ets:update_counter(stats, Channel, -1);
 
