@@ -11,16 +11,20 @@ handle(Req, State) ->
 
 handle_path_info([<<"channel">>, Channel], Req, State) ->
 	Count = stats_server:get_stats(Channel),
-	{ok, Req2} = cowboy_http_req:reply(200, [], jiffy:encode(Count), Req),
-    {ok, Req2, State};
+    Json = jiffy:encode(Count),
+    reply(Json, Req, State);
 
 handle_path_info([], Req, State) ->
 	All = stats_server:get_stats(),
-	{ok, Req2} = cowboy_http_req:reply(200, [], jiffy:encode({All}), Req),
-    {ok, Req2, State};
+	Json = jiffy:encode({All}),
+    reply(Json, Req, State);
 
- handle_path_info(_, Req, State) ->
+handle_path_info(_, Req, State) ->
 	{ok, Req2} = cowboy_http_req:reply(404, [], <<"404">>, Req),
+    {ok, Req2, State}.
+
+reply(Json, Req, State) ->
+    {ok, Req2} = cowboy_http_req:reply(200, [{<<"Content-Type">>, <<"application/json">>}], Json, Req),
     {ok, Req2, State}.
 
 terminate(_Req, _State) ->
