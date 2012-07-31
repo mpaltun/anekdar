@@ -43,7 +43,8 @@ handle_cast({incr, Channel}, State) ->
     {noreply, State};
 
 handle_cast({decr, Channel}, State) ->
-    ets:update_counter(stats, Channel, -1),
+    Count = get_count(ets:lookup(stats, Channel)),
+    decr(Channel, Count),
     {noreply, State};
 
 handle_cast(_Msg, State) ->
@@ -62,6 +63,12 @@ incr(Channel, []) ->
     ets:insert(stats, {Channel, 1});
 incr(Channel, _) ->
     ets:update_counter(stats, Channel, 1).
+
+decr(Channel, Count) when Count > 0 ->
+    ets:update_counter(stats, Channel, -1);
+
+decr(_Channel, _Count) ->
+    ok.
 
 get_count([]) ->
     0;

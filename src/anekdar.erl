@@ -15,6 +15,7 @@ start(_Type, _Args) ->
             {[<<"ws">>], websocket_handler, []},
             {[<<"sub">>, channel], sub_http_handler, []},
             {[<<"pub">>, channel], pub_http_handler, []},
+            {[<<"stats">>, '...'], stats_http_handler, []},
             {'_', default_http_handler, []}
 		]}
 	],
