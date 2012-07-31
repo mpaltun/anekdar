@@ -11,11 +11,11 @@ start() ->
 start(_Type, _Args) ->
 	Dispatch = [
 		{'_', [
-            {[], index_handler, []},
+            {[], index_http_handler, []},
             {[<<"ws">>], websocket_handler, []},
-            {[<<"sub">>, channel], sub_handler, []},
-            {[<<"pub">>, channel], pub_handler, []},
-            {'_', default_handler, []}
+            {[<<"sub">>, channel], sub_http_handler, []},
+            {[<<"pub">>, channel], pub_http_handler, []},
+            {'_', default_http_handler, []}
 		]}
 	],
 	cowboy:start_listener(my_http_listener, 100,

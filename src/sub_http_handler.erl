@@ -1,4 +1,4 @@
--module(sub_handler).
+-module(sub_http_handler).
 -behaviour(cowboy_http_handler).
 -export([init/3, handle/2, info/3, terminate/2]).
 
