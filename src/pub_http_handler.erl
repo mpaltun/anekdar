@@ -6,16 +6,19 @@ init({_Any, http}, Req, []) ->
     {ok, Req, undefined}.
 
 handle(Req, State) ->
-    {Channel, _} = cowboy_http_req:binding(channel, Req),
-   
     Reply = case cowboy_http_req:method(Req) of
         {'POST', Req2} ->
+            % read message body
             {ok, Message, Req3} = cowboy_http_req:body(Req2),
-            Subs_Count = pub_sub_manager:pub(Channel, Message),
-            {ok, Req4} = cowboy_http_req:reply(200,
-                [{'Content-Type', <<"text/plain">>},{<<"Access-Control-Allow-Origin">>, <<"*">>}],
-                    list_to_binary(integer_to_list(Subs_Count)), Req3),
-            Req4;
+            % get channels from query string
+            {QsValues, Req4} = cowboy_http_req:qs_vals(Req3),
+            Channels = [Channel || {<<"c">>, Channel} <- QsValues],
+            
+            Counts = pub_sub_manager:mpub(Channels, Message),
+            {ok, Req5} = cowboy_http_req:reply(200,
+                [{'Content-Type', <<"application/json">>},{<<"Access-Control-Allow-Origin">>, <<"*">>}],
+                    jiffy:encode({Counts}), Req4),
+            Req5;
         {_, Req2} ->
             {ok, Req3} = cowboy_http_req:reply(404, [], <<"Not Found">>, Req2),
             Req3

@@ -14,7 +14,7 @@ start(_Type, _Args) ->
             {[], index_http_handler, []},
             {[<<"ws">>], websocket_handler, []},
             {[<<"sub">>, channel], sub_http_handler, []},
-            {[<<"pub">>, channel], pub_http_handler, []},
+            {[<<"pub">>], pub_http_handler, []},
             {[<<"stats">>, '...'], stats_http_handler, []},
             {'_', default_http_handler, []}
 		]}
