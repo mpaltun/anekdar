@@ -19,4 +19,4 @@ dist-clean: clean
 	@./rebar delete-deps
 
 start: compile 
-	erl -pa ebin -pa deps/*/ebin -boot start_sasl -s anekdar
+	erl -pa $(PWD)/ebin -pa deps/*/ebin -boot start_sasl -s anekdar

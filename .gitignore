@@ -4,3 +4,5 @@ ebin
 erl_crash.dump
 *.pyc
 *.swp
+.idea
+anekdar.iml

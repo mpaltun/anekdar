@@ -9,16 +9,8 @@ start() ->
 	application:start(anekdar).
 
 start(_Type, _Args) ->
-	Dispatch = [
-		{'_', [
-            {[], index_http_handler, []},
-            {[<<"ws">>], websocket_handler, []},
-            {[<<"sub">>, channel], sub_http_handler, []},
-            {[<<"pub">>, channels], pub_http_handler, []},
-            {[<<"stats">>, '...'], stats_http_handler, []},
-            {'_', default_http_handler, []}
-		]}
-	],
+  PrivDir = code:priv_dir(anekdar),
+  {ok, Dispatch} = file:consult(PrivDir ++ "/dispatch.conf"),
 	cowboy:start_listener(my_http_listener, 100,
 		cowboy_tcp_transport, [{port, 9999}],
 		cowboy_http_protocol, [{dispatch, Dispatch}]
