@@ -9,7 +9,7 @@ start() ->
 	application:start(anekdar).
 
 start(_Type, _Args) ->
-  PrivDir = code:priv_dir(anekdar),
+  PrivDir = get_priv_dir(),
   {ok, Conf} = file:consult(PrivDir ++ "/anekdar.conf"),
   [{dispatch, Dispatch, http_address, Http_address, http_port, Http_port, tcp_address, Tcp_address, tcp_port, Tcp_port}] = Conf,
 	cowboy:start_listener(my_http_listener, 100,
@@ -23,6 +23,15 @@ start(_Type, _Args) ->
     ets_server:start_link(),
     stats_server:start_link(),
 	anekdar_sup:start_link().
+
+get_priv_dir() ->
+    case code:priv_dir(anekdar) of
+        {error, bad_name} ->
+            {ok, Cwd} = file:get_cwd(),
+            Cwd ++ "/" ++ "priv/";
+        Priv ->
+            Priv ++ "/"
+    end.
 
 stop(_State) ->
 	ok.
